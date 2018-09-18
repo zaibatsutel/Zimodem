@@ -1,0 +1,182 @@
+/*
+   Copyright 2016-2017 Bo Zimmerman
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+	   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+
+#include "phonebook.h"
+#include "str.h"
+#include "board/board.h"
+
+
+extern PhoneBookEntry* phonebook;
+
+PhoneBookEntry::PhoneBookEntry(unsigned long phnum, const char *addr, const char *mod)
+{
+  number=phnum;
+  address = new char[strlen(addr)+1];
+  strcpy((char *)address,addr);
+  modifiers = new char[strlen(mod)+1];
+  strcpy((char *)modifiers,mod);
+  
+  if(phonebook == NULL)
+    phonebook = this;
+  else
+  {
+    PhoneBookEntry *last = phonebook;
+    while(last->next != NULL)
+      last = last->next;
+    last->next = this;
+  }
+}
+
+PhoneBookEntry::~PhoneBookEntry()
+{
+  if(phonebook == this)
+    phonebook = next;
+  else
+  {
+    PhoneBookEntry *last = phonebook;
+    while((last != NULL) && (last->next != this)) // don't change this!
+      last = last->next;
+    if(last != NULL)
+      last->next = next;
+  }
+  freeCharArray((char **)&address);
+  freeCharArray((char **)&modifiers);
+  next=NULL;
+}
+
+void PhoneBookEntry::loadPhonebook()
+{
+  clearPhonebook();
+  if(SPIFFS.exists("/zphonebook.txt"))
+  {
+    File f = SPIFFS.open("/zphonebook.txt", "r");
+    while(f.available()>0)
+    {
+      String str="";
+      char c=f.read();
+      while((c != '\n') && (f.available()>0))
+      {
+        str += c;
+        c=f.read();
+      }
+      int argn=0;
+      String configArguments[3];
+      for(int i=0;i<3;i++)
+        configArguments[i]="";
+      for(int i=0;i<str.length();i++)
+      {
+        if((str[i]==',')&&(argn<=2))
+          argn++;
+        else
+          configArguments[argn] += str[i];
+      }
+      PhoneBookEntry *phb = new PhoneBookEntry(atol(configArguments[0].c_str()),configArguments[1].c_str(),configArguments[2].c_str());
+    }
+    f.close();
+  }
+}
+
+bool PhoneBookEntry::checkPhonebookEntry(String cmd)
+{
+    const char *vbuf=(char *)cmd.c_str();
+    bool error = false;
+    for(char *cptr=(char *)vbuf;*cptr!=0;cptr++)
+    {
+      if(strchr("0123456789",*cptr) < 0)
+      {
+        error =true;
+      }
+    }
+    if(error || (strlen((char *)vbuf)>9))
+      return false;
+    return true;
+}
+
+PhoneBookEntry *PhoneBookEntry::findPhonebookEntry(long number)
+{
+  PhoneBookEntry *p = phonebook;
+  while(p != NULL)
+  {
+    if(p->number == number)
+      return p;
+    p=p->next;
+  }
+  return NULL;
+}
+
+PhoneBookEntry *PhoneBookEntry::findPhonebookEntry(String number)
+{
+  if(!checkPhonebookEntry(number))
+    return NULL;
+  return findPhonebookEntry(atol(number.c_str()));
+}
+
+void PhoneBookEntry::clearPhonebook()
+{
+  PhoneBookEntry *phb = phonebook;
+  while(phonebook != NULL)
+    delete phonebook;
+}
+
+void PhoneBookEntry::savePhonebook()
+{
+  SPIFFS.remove("/zphonebook.txt");
+  delay(500);
+  File f = SPIFFS.open("/zphonebook.txt", "w");
+  int ct=0;
+  PhoneBookEntry *phb=phonebook;
+  while(phb != NULL)
+  {
+    // was %ul,%s,%s -> unsigned long is %l http://www.cplusplus.com/reference/cstdio/printf/
+    f.printf("%l,%s,%s\n",phb->number,phb->address,phb->modifiers);
+    phb = phb->next;
+    ct++;
+  }
+  f.close();
+  delay(500);
+  if(SPIFFS.exists("/zphonebook.txt"))
+  {
+    File f = SPIFFS.open("/zphonebook.txt", "r");
+    while(f.available()>0)
+    {
+      String str="";
+      char c=f.read();
+      while((c != '\n') && (f.available()>0))
+      {
+        str += c;
+        c=f.read();
+      }
+      int argn=0;
+      if(str.length()>0)
+      {
+        for(int i=0;i<str.length();i++)
+        {
+          if((str[i]==',')&&(argn<=2))
+            argn++;
+        }
+      }
+      if(argn!=2)
+      {
+        delay(100);
+        f.close();
+        savePhonebook();
+        return;
+      }
+    }
+    f.close();
+  }
+}
