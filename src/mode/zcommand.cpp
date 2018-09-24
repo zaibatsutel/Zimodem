@@ -28,6 +28,7 @@
 #include "../phonebook.h"
 #include "../filelog.h"
 
+ZCommand commandMode;
 
 extern "C" void esp_schedule();
 extern "C" void esp_yield();
@@ -2192,6 +2193,7 @@ ZResult ZCommand::doSerialCommand()
           vbuf[i]=lc(vbuf[i]);
         if(strcmp((const char *)vbuf,"config")==0)
         {
+	    debugPrintf("Switching to config mode...");
             configMode.switchTo();
             result = ZOK;
         }

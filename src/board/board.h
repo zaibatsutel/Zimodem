@@ -67,9 +67,17 @@
 # define DEFAULT_PIN_CTS 5 // is 0 for ESP-01, see getDefaultCtsPin() below.
 # define DEFAULT_PIN_DCD 2
 # define DEFAULT_FCT FCT_RTSCTS
-# define RS232_INVERTED 1
+
+//# define RS232_INVERTED 1
+#ifndef ZIMODEM_SLIME
 # define debugPrintf doNothing
-inline void doNothing(const char* format, ...) { /* it does nothing! */ }
+inline void doNothing(const char* format, ...) {
+	/* does nothing */
+}
+#else
+#define debugPrintf Serial.printf
+#endif
+
 
 #else
 #error "FAILURE: Unknown build target????"

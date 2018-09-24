@@ -175,6 +175,6 @@ class ZCommand : public ZMode
     void loop();
 };
 
-static ZCommand commandMode;
+extern ZCommand commandMode;
 
 #endif

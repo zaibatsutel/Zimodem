@@ -21,6 +21,8 @@
 #include "../connSettings.h"
 #include "../zimodem.h"
 
+WiFiClientNode *conns;
+
 void WiFiClientNode::finishConnectionLink()
 {
   wasConnected=true;

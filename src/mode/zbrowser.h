@@ -64,7 +64,7 @@ class ZBrowser : public ZMode
     void loop();
 };
 
-static ZBrowser browseMode;
+extern ZBrowser browseMode;
 
 #endif // __MODE_ZBROWSER_H__
 #endif // INCLUDE_SD_SHELL

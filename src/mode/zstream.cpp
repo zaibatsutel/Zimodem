@@ -19,6 +19,8 @@
 #include "../modem_state.h"
 #include "../zimodem.h"
 
+ZStream streamMode;
+
 void ZStream::switchTo(WiFiClientNode *conn)
 {
   current = conn;

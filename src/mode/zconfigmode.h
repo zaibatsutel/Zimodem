@@ -63,6 +63,6 @@ class ZConfig : public ZMode
     void loop();
 };
 
-static ZConfig configMode;
+extern ZConfig configMode;
 
 #endif

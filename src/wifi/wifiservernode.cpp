@@ -17,6 +17,8 @@
 #include "../str.h"
 #include "../board/board.h"
 
+WiFiServerNode *servs;
+
 WiFiServerSpec::WiFiServerSpec()
 {
   setCharArray(&delimiters,"");

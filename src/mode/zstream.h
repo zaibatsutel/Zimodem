@@ -54,6 +54,6 @@ class ZStream : public ZMode
     void loop();
 };
 
-static ZStream streamMode;
+extern ZStream streamMode;
 
 #endif

@@ -68,6 +68,9 @@ void s_pinWrite(uint8_t pinNo, uint8_t value)
   {
     digitalWrite(pinNo, value);
   }
+  else {
+	  debugPrintf("Attempted to write to unsafe pin %d value %d", pinNo, value);
+  }
 }
 
 bool connectWifi(const char* ssid, const char* password)

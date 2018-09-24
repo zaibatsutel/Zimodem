@@ -97,6 +97,6 @@ class WiFiClientNode : public Stream
     static int getNumOpenWiFiConnections();
 };
 
-static WiFiClientNode *conns;
+extern WiFiClientNode *conns;
 
 #endif

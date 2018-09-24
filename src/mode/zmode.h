@@ -13,6 +13,6 @@ class ZMode
 };
 
 
-static ZMode *currMode;
+extern ZMode *currMode;
 
 # endif //__zmode_h__

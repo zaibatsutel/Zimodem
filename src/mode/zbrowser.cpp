@@ -26,7 +26,7 @@
 #include "../proto/proto_zmodem.h"
 
 
-//static ZBrowser browseMode;
+ZBrowser browseMode;
 
 static void initSDShell()
 {

@@ -22,9 +22,14 @@
 #include "../modem_state.h"
 #include "../zimodem.h"
 
+ZConfig configMode;
+
 void ZConfig::switchTo()
 {
+  debugPrintf("current mode =%p\n",currMode);
   currMode=&configMode;
+  debugPrintf("current mode =%p", currMode);
+  debugPrintf(" -> config mode %p", &configMode);
   serial.setFlowControlType(commandMode.serial.getFlowControlType());
   #ifdef INCLUDE_PETSCII
   serial.setPetsciiMode(commandMode.serial.isPetsciiMode());

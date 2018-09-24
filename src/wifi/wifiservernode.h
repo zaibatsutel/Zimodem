@@ -56,6 +56,6 @@ class WiFiServerNode : public WiFiServerSpec
     static void RestoreWiFiServers();
 };
 
-static WiFiServerNode *servs;
+extern WiFiServerNode *servs;
 
 #endif
