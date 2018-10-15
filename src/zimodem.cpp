@@ -89,6 +89,7 @@ bool connectWifi(const char* ssid, const char* password)
       WiFi.hostname(hostname);
 #endif
   }
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   bool amConnected = (WiFi.status() == WL_CONNECTED) && (strcmp(WiFi.localIP().toString().c_str(), "0.0.0.0")!=0);
@@ -97,9 +98,14 @@ bool connectWifi(const char* ssid, const char* password)
   {
     WiFiCounter++;
     if(!amConnected)
-      delay(500);
+    { 
+      delay(500); yield();
+    }
     amConnected = (WiFi.status() == WL_CONNECTED) && (strcmp(WiFi.localIP().toString().c_str(), "0.0.0.0")!=0);
   }
+  
+  WiFi.printDiag(Serial);
+  
   wifiConnected = amConnected;
   if(!amConnected)
     WiFi.disconnect();
@@ -209,8 +215,9 @@ void setup()
   pinSupport[36]=true;
   pinSupport[39]=true;
 #else
-  pinSupport[0]=true;
-  pinSupport[2]=true;
+  pinSupport[DEFAULT_PIN_RTS]=true;
+  pinSupport[DEFAULT_PIN_CTS]=true;
+  pinSupport[DEFAULT_PIN_DCD]=true;
   if((ESP.getFlashChipRealSize()/1024)>=4096) // assume this is a strykelink/esp12e
   {
     pinSupport[4]=true;
@@ -241,6 +248,13 @@ void setup()
   dcdStatus = dcdInactive;
   s_pinWrite(pinDCD,dcdStatus);
   flushSerial();
+
+  WiFi.setPhyMode(WIFI_PHY_MODE_11G);
+  // https://github.com/esp8266/Arduino/issues/2265#issuecomment-233846247
+  // This is silly? 
+  WiFi.setOutputPower(0);
+
+
 }
 
 void loop() 
