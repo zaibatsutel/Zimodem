@@ -14,6 +14,33 @@
 */
 
 
+#ifndef ZIMODEM_TARGET
+#error "No board target specified. Please specify one with -DZIMODEM_TARGET="
+#else
+// This is a hack:
+// The C preprocessor allows us to expand macros only in #defines, but allows us to
+// use a single #define in an include path
+// To the poor sod who has to figure this out:
+// https://stackoverflow.com/a/32077478 I stole it from here
+
+// This creates the identity of a thing, making it a token
+#define IDENT(x) x
+// this creates the stringified version of a token
+#define XSTR(x) #x
+// this turns the stringified thing into a token
+#define STR(x) XSTR(x)
+// this smashes several tokens together
+#define PATH(x,y,z) STR(IDENT(x)IDENT(y)IDENT(z))
+// this defines the two sides of our token-string-contraption
+#define BOARD_DIR boards/
+#define BOARD_EXT .h
+// and this crams it into the place we expect it. 
+#include PATH(BOARD_DIR,ZIMODEM_TARGET, BOARD_EXT)
+
+
+
+#endif
+
 #if ZIMODEM_ESP32
 # include <WiFi.h>
 # define ENC_TYPE_NONE WIFI_AUTH_OPEN
@@ -32,7 +59,12 @@
 # define HWSerial Serial
 #endif
 
+inline void doNothing(const char* format, ...) {
+	/* does nothing */
+}
 
+
+#if 0
 #ifdef ZIMODEM_ESP32
 // ESP32 specific things. 
 # define DEFAULT_PIN_DCD GPIO_NUM_14
@@ -83,5 +115,8 @@ inline void doNothing(const char* format, ...) {
 #error "FAILURE: Unknown build target????"
 
 #endif
+
+#endif // 0
+
 
 #endif
